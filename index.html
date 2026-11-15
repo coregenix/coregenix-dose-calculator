@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>COREGENIX Dose Calculator — IV, injection &amp; pediatric dispensing</title>
+  <meta name="description" content="Free open-source dose calculator by COREGENIX. Enter container size and prescribed mL/hr to find how many bottles, bags or vials to dispense — in hours or minutes, adult or pediatric.">
+  <meta name="theme-color" content="#070b14">
+  <meta property="og:title" content="COREGENIX Dose Calculator">
+  <meta property="og:description" content="How many bottles, bags or vials to dispense? Adult and pediatric. Made by Sant Kumar.">
+  <meta property="og:type" content="website">
+  <link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="bg-grid" aria-hidden="true"></div>
+
+  <header class="site-header no-print">
+    <a class="brand" href="#infusion">
+      <img src="assets/logo.svg" alt="" width="38" height="38">
+      <span><b>COREGENIX</b><small>Dose Calculator</small><em>Made by Sant Kumar</em></span>
+    </a>
+    <a class="gh" href="https://github.com/coregenix" target="_blank" rel="noopener">GitHub Profile ↗</a>
+  </header>
+
+  <main>
+    <section class="hero no-print">
+      <span class="pill"><i></i> OPEN SOURCE · PHARMACY TOOLKIT</span>
+      <h1>Dose <span class="grad">Calculator</span></h1>
+      <p>Type the container size and the rate the doctor prescribed. Get exactly how many bottles, bags or vials to dispense — in hours or minutes, adult or pediatric.</p>
+      <div class="hero-meta">
+        <span>NS · DNS · RL · D5W</span>
+        <span>1 – 1000 mL containers</span>
+        <span>Pediatric ready</span>
+      </div>
+    </section>
+
+    <div class="disclaimer no-print" role="note">
+      <b>Check before you dispense.</b> This tool is for calculation support and education. Always verify results against the prescription, your hospital protocol and a qualified pharmacist or physician.
+    </div>
+
+    <nav class="tabs no-print" role="tablist" aria-label="Calculator type">
+      <button class="tab active" role="tab" data-tab="infusion" aria-selected="true">Infusion / Injection</button>
+      <button class="tab" role="tab" data-tab="multi" aria-selected="false">All injections</button>
+      <button class="tab" role="tab" data-tab="pediatric" aria-selected="false">Pediatric</button>
+      <button class="tab" role="tab" data-tab="about" aria-selected="false">How it works</button>
+    </nav>
+
+    <datalist id="fluids">
+      <option value="NS"></option><option value="DNS"></option><option value="RL"></option>
+      <option value="D5W"></option><option value="D10W"></option>
+    </datalist>
+
+    <datalist id="sizes">
+      <option value="1"></option><option value="2"></option><option value="3"></option>
+      <option value="5"></option><option value="10"></option><option value="20"></option>
+      <option value="50"></option><option value="100"></option><option value="250"></option>
+      <option value="500"></option><option value="1000"></option>
+    </datalist>
+
+    <!-- ============ 1. INFUSION ============ -->
+    <section class="panel" id="tab-infusion" role="tabpanel">
+      <div class="grid">
+        <form class="card no-print" id="inf-form" autocomplete="off" onsubmit="return false">
+          <h2><span class="idx">01</span> Prescription</h2>
+
+          <div class="field">
+            <label for="inf-fluid">Fluid / injection</label>
+            <input id="inf-fluid" type="text" list="fluids" maxlength="60" placeholder="Type the injection / fluid name (optional)">
+          </div>
+
+          <div class="field">
+            <label for="inf-size">Container size available (mL)</label>
+            <div class="chips" id="inf-chips"></div>
+            <input id="inf-size" type="number" min="0" step="any" value="500" inputmode="decimal" placeholder="Any size, e.g. 7.5">
+          </div>
+
+          <div class="row2">
+            <div class="field">
+              <label for="inf-rate">Prescribed rate</label>
+              <div class="combo">
+                <input id="inf-rate" type="number" min="0" step="any" value="100" inputmode="decimal">
+                <select id="inf-rateunit" aria-label="Rate unit"><option value="hr">mL/hr</option><option value="min">mL/min</option></select>
+              </div>
+            </div>
+            <div class="field">
+              <label for="inf-dur">Dispense for</label>
+              <div class="combo">
+                <input id="inf-dur" type="number" min="0" step="any" value="24" inputmode="decimal">
+                <select id="inf-durunit" aria-label="Duration unit"><option value="hr">Hours</option><option value="min">Minutes</option></select>
+              </div>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="inf-drop">Giving set (optional — for drip rate)</label>
+            <select id="inf-drop">
+              <option value="0">Not needed</option>
+              <option value="10">10 gtt/mL</option>
+              <option value="15">15 gtt/mL</option>
+              <option value="20">20 gtt/mL (standard)</option>
+              <option value="60">60 gtt/mL (micro-drip)</option>
+            </select>
+          </div>
+        </form>
+
+        <div class="card result" id="inf-result" aria-live="polite"></div>
+      </div>
+
+      <div class="card">
+        <h2><span class="idx">02</span> Same volume, every container size</h2>
+        <p class="sub">Handy when the ward has a different bottle or vial than the one prescribed.</p>
+        <div id="inf-compare" class="table-wrap"></div>
+      </div>
+    </section>
+
+    <!-- ============ 2. MULTI ============ -->
+    <section class="panel" id="tab-multi" role="tabpanel" hidden>
+      <div class="card no-print">
+        <h2><span class="idx">01</span> Everything on the chart</h2>
+        <p class="sub">Add every bag, bottle and vial the patient needs. The same duration is used for all of them.</p>
+        <div class="toolbar">
+          <div class="field inline">
+            <label for="multi-dur">Dispense for</label>
+            <div class="combo">
+              <input id="multi-dur" type="number" min="0" step="any" value="24" inputmode="decimal">
+              <select id="multi-durunit" aria-label="Duration unit"><option value="hr">Hours</option><option value="min">Minutes</option></select>
+            </div>
+          </div>
+          <div class="btn-row">
+            <button type="button" class="btn" id="multi-add">+ Add row</button>
+            <button type="button" class="btn ghost" id="multi-example">Load example</button>
+            <button type="button" class="btn ghost" id="multi-clear">Clear</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="rows">
+            <thead><tr><th>Injection / fluid</th><th>Container (mL)</th><th>Rate (mL/hr)</th><th class="x"></th></tr></thead>
+            <tbody id="multi-rows"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card result" id="multi-result" aria-live="polite"></div>
+    </section>
+
+    <!-- ============ 3. PEDIATRIC ============ -->
+    <section class="panel" id="tab-pediatric" role="tabpanel" hidden>
+      <div class="grid">
+        <form class="card no-print" id="ped-form" autocomplete="off" onsubmit="return false">
+          <h2><span class="idx">01</span> Pediatric order</h2>
+
+          <div class="seg" role="tablist" aria-label="Pediatric calculation type">
+            <button type="button" class="seg-btn active" data-mode="fluid">Maintenance fluid</button>
+            <button type="button" class="seg-btn" data-mode="perkg">mL/kg/hr</button>
+            <button type="button" class="seg-btn" data-mode="drug">mg/kg injection</button>
+          </div>
+
+          <div class="row2">
+            <div class="field">
+              <label for="ped-weight">Weight (kg)</label>
+              <input id="ped-weight" type="number" min="0" step="any" value="15" inputmode="decimal">
+            </div>
+            <div class="field">
+              <label for="ped-dur">Dispense for</label>
+              <div class="combo">
+                <input id="ped-dur" type="number" min="0" step="any" value="24" inputmode="decimal">
+                <select id="ped-durunit" aria-label="Duration unit"><option value="hr">Hours</option><option value="min">Minutes</option></select>
+              </div>
+            </div>
+          </div>
+
+          <!-- fluid + per-kg -->
+          <div data-modes="fluid perkg">
+            <div class="field">
+              <label for="ped-fluid">Fluid</label>
+              <input id="ped-fluid" type="text" list="fluids" maxlength="60" placeholder="Type the fluid name (optional)">
+            </div>
+            <div class="field">
+              <label for="ped-size">Container size available (mL)</label>
+              <div class="chips" id="ped-chips"></div>
+              <input id="ped-size" type="number" min="0" step="any" value="100" inputmode="decimal">
+            </div>
+            <div class="field">
+              <label for="ped-drop">Giving set</label>
+              <select id="ped-drop">
+                <option value="60" selected>60 gtt/mL (micro-drip / burette)</option>
+                <option value="0">Not needed</option>
+                <option value="10">10 gtt/mL</option>
+                <option value="15">15 gtt/mL</option>
+                <option value="20">20 gtt/mL</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field" data-modes="fluid">
+            <label for="ped-pct">% of maintenance</label>
+            <input id="ped-pct" type="number" min="0" step="any" value="100" inputmode="decimal">
+          </div>
+
+          <div class="field" data-modes="perkg" hidden>
+            <label for="ped-mlkghr">Ordered rate (mL/kg/hr)</label>
+            <input id="ped-mlkghr" type="number" min="0" step="any" value="4" inputmode="decimal">
+          </div>
+
+          <!-- drug -->
+          <div data-modes="drug" hidden>
+            <div class="row2">
+              <div class="field">
+                <label for="ped-dose">Dose (mg/kg/dose)</label>
+                <input id="ped-dose" type="number" min="0" step="any" value="15" inputmode="decimal">
+              </div>
+              <div class="field">
+                <label for="ped-freq">Frequency</label>
+                <select id="ped-freq">
+                  <option value="1">Once daily (OD)</option>
+                  <option value="2">Twice daily (q12h)</option>
+                  <option value="3">Three times (q8h)</option>
+                  <option value="4" selected>Four times (q6h)</option>
+                  <option value="6">Six times (q4h)</option>
+                  <option value="12">Twelve times (q2h)</option>
+                </select>
+              </div>
+            </div>
+            <div class="row2">
+              <div class="field">
+                <label for="ped-vialmg">Vial strength (mg)</label>
+                <input id="ped-vialmg" type="number" min="0" step="any" value="500" inputmode="decimal">
+              </div>
+              <div class="field">
+                <label for="ped-vialml">Vial volume (mL)</label>
+                <input id="ped-vialml" type="number" min="0" step="any" value="10" inputmode="decimal" list="sizes">
+              </div>
+            </div>
+            <div class="field">
+              <label for="ped-max">Maximum single dose (mg, optional)</label>
+              <input id="ped-max" type="number" min="0" step="any" inputmode="decimal" placeholder="Leave empty for no limit">
+            </div>
+          </div>
+        </form>
+
+        <div class="card result" id="ped-result" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <!-- ============ 4. ABOUT ============ -->
+    <section class="panel" id="tab-about" role="tabpanel" hidden>
+      <div class="card prose">
+        <h2><span class="idx">i</span> How the numbers are worked out</h2>
+
+        <h3>Containers to dispense</h3>
+        <pre>total volume (mL) = rate (mL/hr) × duration (hr)
+containers        = total volume ÷ container size
+dispense          = containers, rounded UP to a whole unit</pre>
+        <p>Example: 100 mL/hr for 24 h = 2,400 mL. With 500 mL bottles that is 4.8, so <b>5 bottles</b> are supplied (4 full and 1 used up to 400 mL, 100 mL left over). Minutes are converted to hours (90 min = 1.5 h). A rate in mL/min is multiplied by 60.</p>
+
+        <h3>Pediatric maintenance fluid (Holliday–Segar)</h3>
+        <pre>Daily : 100 mL/kg for the first 10 kg
+        + 50 mL/kg for the next 10 kg
+        + 20 mL/kg for every kg above 20
+
+Hourly (4-2-1 rule): 4 mL/kg/hr  (first 10 kg)
+                     2 mL/kg/hr  (next 10 kg)
+                     1 mL/kg/hr  (each kg above 20)</pre>
+        <p>The hourly figure is the standard bedside rounding of the daily figure and is the rate used to count containers. Rates are capped at 100 mL/hr (2,400 mL/day). Neonates under 3 kg follow separate protocols.</p>
+
+        <h3>Weight-based injections</h3>
+        <pre>dose (mg)       = weight (kg) × dose (mg/kg)
+concentration   = vial strength (mg) ÷ vial volume (mL)
+volume per dose = dose ÷ concentration
+doses           = doses per day × hours ÷ 24   (rounded up)</pre>
+        <p>Two vial counts are shown: <b>single-dose vials</b> (a fresh vial for every dose, remainder discarded) and <b>multi-dose vial</b> (the same vial can be re-used).</p>
+
+        <h3>Drip rate</h3>
+        <pre>drops per minute = rate (mL/hr) × drop factor (gtt/mL) ÷ 60</pre>
+      </div>
+
+      <div class="card author">
+        <img src="assets/logo.svg" alt="COREGENIX logo" width="72" height="72">
+        <div>
+          <h2>Made by Sant Kumar</h2>
+          <p>Founder of <b>COREGENIX</b> · M.Pharm (Pharmacology) · building healthcare, biotech and AI-driven research solutions.</p>
+          <p><a href="https://github.com/coregenix" target="_blank" rel="noopener">github.com/coregenix ↗</a></p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer no-print">
+    <div>
+      <b>COREGENIX</b> · Made by <b>Sant Kumar</b>
+    </div>
+    <div class="muted">© 2026 COREGENIX · MIT License · For calculation support only — verify before dispensing.</div>
+  </footer>
+
+  <script src="js/calc.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

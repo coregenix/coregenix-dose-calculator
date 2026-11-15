@@ -1,0 +1,19 @@
+{
+  "name": "coregenix-dose-calculator",
+  "version": "1.0.0",
+  "description": "COREGENIX Dose Calculator — how many bottles, bags or vials to dispense. Adult and pediatric. Made by Sant Kumar.",
+  "main": "js/calc.js",
+  "scripts": {
+    "test": "node tests/calc.test.js",
+    "start": "npx serve ."
+  },
+  "keywords": ["dose-calculator", "iv-infusion", "pharmacy", "pediatric", "healthcare", "coregenix"],
+  "author": "Sant Kumar (COREGENIX)",
+  "license": "MIT",
+  "homepage": "https://coregenix.github.io/coregenix-dose-calculator/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/coregenix/coregenix-dose-calculator.git"
+  },
+  "bugs": { "url": "https://github.com/coregenix/coregenix-dose-calculator/issues" }
+}
